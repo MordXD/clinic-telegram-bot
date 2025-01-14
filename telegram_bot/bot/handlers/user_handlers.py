@@ -49,9 +49,9 @@ async def handle_application_comment(update: Update, context: ContextTypes.DEFAU
     bot = context.bot
     message = (
          f"📝 *Новая заявка:*\n"
-         f"👤 *Имя:* {application_data['name']}\n"
-         f"📞 *Номер телефона:* `{application_data['phone']}`\n"
-         f"💬 *Комментарий:* {application_data['comment'] or 'Без комментариев'}"
+         f"👤 *Имя:* {escape_markdown_v2(application_data['name'])}\n"
+         f"📞 *Номер телефона:* `{escape_markdown_v2(application_data['phone'])}`\n"
+         f"💬 *Комментарий:* {escape_markdown_v2(application_data['comment'] or 'Без комментариев')}"
      )
     await bot.send_message(
         chat_id=ADMIN_CHAT_ID,
@@ -116,7 +116,7 @@ async def send_feedback_to_admin(update: Update, context: ContextTypes.DEFAULT_T
     message = (
         f"📝 *Новый отзыв:*\n"
         f"👤 *Пользователь:* {escape_markdown_v2(user.first_name)} {escape_markdown_v2(user.last_name or '')} (@{escape_markdown_v2(user.username or 'нет')})\n"
-        f"⭐ *Оценка:* {feedback_data.get('rating', 'Нет оценки')}\n"
+        f"⭐ *Оценка:* {escape_markdown_v2(str(feedback_data.get('rating', 'Нет оценки')))}\n"
         f"👎 *Что не понравилось:* {escape_markdown_v2(feedback_data.get('dislikes', 'Не указано'))}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MarkdownV2")
