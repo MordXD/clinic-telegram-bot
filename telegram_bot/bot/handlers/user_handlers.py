@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup, Bot
 from telegram.ext import ContextTypes, MessageHandler, filters
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -32,7 +32,14 @@ async def handle_application_comment(update: Update, context: ContextTypes.DEFAU
     await update.message.reply_text("Ваша заявка принята. Ожидайте звонка.")
     # Send the application data to the admin chat
     application_data = context.user_data['application']
-    # Example: send_application_to_admin(application_data)
+    bot = context.bot
+    message = (
+        f"New Application:\n"
+        f"Name: {application_data['name']}\n"
+        f"Phone Number: {application_data['phone']}\n"
+        f"Comment: {application_data['comment'] or 'No comment'}"
+    )
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message)
     return "END"
 
 async def skip_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -56,7 +63,13 @@ async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_
     await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
     # Send the feedback data to the admin chat
     feedback_data = context.user_data['feedback']
-    # Example: send_feedback_to_admin(feedback_data)
+    bot = context.bot
+    message = (
+        f"New Feedback:\n"
+        f"Rating: {feedback_data['rating']}\n"
+        f"Comment: {feedback_data['comment']}"
+    )
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message)
     return "END"
 
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
