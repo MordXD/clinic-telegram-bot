@@ -70,11 +70,11 @@ async def handle_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback'] = {}
     # Create inline buttons for star ratings
     keyboard = [
-        [InlineKeyboardButton("⭐", callback_data='1'),
-         InlineKeyboardButton("⭐⭐", callback_data='2'),
-         InlineKeyboardButton("⭐⭐⭐", callback_data='3'),
-         InlineKeyboardButton("⭐⭐⭐⭐", callback_data='4'),
-         InlineKeyboardButton("⭐⭐⭐⭐⭐", callback_data='5')]
+        [InlineKeyboardButton("👍", callback_data='1'),
+         InlineKeyboardButton("👌", callback_data='2'),
+         InlineKeyboardButton("😊", callback_data='3'),
+         InlineKeyboardButton("😃", callback_data='4'),
+         InlineKeyboardButton("🌟", callback_data='5')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Пожалуйста, выберите вашу оценку:", reply_markup=reply_markup)
@@ -92,11 +92,37 @@ async def skip_likes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    context.user_data['feedback']['rating'] = query.data
-    await query.edit_message_text(text=f"Вы выбрали {query.data} звёзд. Теперь введите текст отзыва:")
-    return "COMMENT"
+    rating = int(query.data)
+    context.user_data['feedback']['rating'] = rating
 
-async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Send feedback to admin group
+    bot = context.bot
+    message = (
+        f"📝 *Новый отзыв:*\n"
+        f"⭐ *Оценка:* {rating}"
+    )
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
+
+    if rating < 4:
+        await query.edit_message_text(text=f"Вы выбрали {query.data}. Пожалуйста, напишите, что вам не понравилось:")
+        return "DISLIKES"
+    else:
+        await query.edit_message_text(text="Спасибо за ваш отзыв! Мы ценим ваше мнение.")
+        return ConversationHandler.END
+
+async def handle_feedback_dislikes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['feedback']['dislikes'] = update.message.text
+    await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
+    # Send the detailed feedback to the admin chat
+    feedback_data = context.user_data.get('feedback', {})
+    bot = context.bot
+    message = (
+        f"📝 *Новый отзыв:*\n"
+        f"⭐ *Оценка:* {feedback_data.get('rating', 'Нет оценки')}\n"
+        f"👎 *Что не понравилось:* {feedback_data['dislikes']}"
+    )
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
+    return ConversationHandler.END
     context.user_data['feedback']['comment'] = update.message.text
     await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
     # Send the feedback data to the admin chat
@@ -131,8 +157,7 @@ def handle_user_commands():
             entry_points=[MessageHandler(filters.TEXT & filters.Regex("^Оставить отзыв$"), handle_feedback)],
             states={
                 "RATING": [CallbackQueryHandler(handle_feedback_rating)],
-                "LIKES": [MessageHandler(filters.TEXT, handle_feedback_likes), CommandHandler("skip", skip_likes)],
-                "COMMENT": [MessageHandler(filters.TEXT, handle_feedback_comment)],
+                "DISLIKES": [MessageHandler(filters.TEXT, handle_feedback_dislikes)],
             },
             fallbacks=[CommandHandler("cancel", start)],
         ),
