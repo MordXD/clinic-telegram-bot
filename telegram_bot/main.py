@@ -22,7 +22,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
-    await update.message.reply_photo(photo=open('assets/image.jpg', 'rb'))
+    await update.message.reply_photo(photo=open('assets/image.png', 'rb'))
     await update.message.reply_text(clinic_info, reply_markup=reply_markup)
 
 def main():
