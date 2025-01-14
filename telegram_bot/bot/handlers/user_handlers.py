@@ -18,7 +18,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_application(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application'] = {}
     await update.message.reply_text("Пожалуйста, введите ваше имя:")
-    return ConversationHandler.END
+    return "NAME"
 
 async def handle_application_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application']['name'] = update.message.text
