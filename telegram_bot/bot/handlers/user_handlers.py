@@ -39,7 +39,7 @@ async def handle_application_phone(update: Update, context: ContextTypes.DEFAULT
     
     context.user_data['application']['phone'] = phone_number
     await update.message.reply_text("Введите комментарий (опционально) или нажмите /skip:")
-    return "COMMENT"
+    return "RATING"
 
 async def handle_application_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application']['comment'] = update.message.text
@@ -99,7 +99,7 @@ async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_
         f"💬 *Комментарий:* {feedback_data['comment']}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
-    return "END"
+    return ConversationHandler.END
 
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Контактные данные клиники: +1234567890")
