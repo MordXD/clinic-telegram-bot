@@ -37,10 +37,10 @@ async def handle_application_comment(update: Update, context: ContextTypes.DEFAU
     application_data = context.user_data['application']
     bot = context.bot
     message = (
-        f"New Application:\n"
-        f"Name: {application_data['name']}\n"
-        f"Phone Number: {application_data['phone']}\n"
-        f"Comment: {application_data['comment'] or 'No comment'}"
+        f"📝 *Новая заявка:*\n"
+        f"👤 *Имя:* {application_data['name']}\n"
+        f"📞 *Номер телефона:* `{application_data['phone']}`\n"
+        f"💬 *Комментарий:* {application_data['comment'] or 'Без комментариев'}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message)
     return ConversationHandler.END
