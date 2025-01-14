@@ -55,8 +55,7 @@ async def handle_application_comment(update: Update, context: ContextTypes.DEFAU
     )
     await bot.send_message(
         chat_id=ADMIN_CHAT_ID,
-        text=message,
-        parse_mode="MARKDOWN"
+        text=message
     )
     return ConversationHandler.END
 
