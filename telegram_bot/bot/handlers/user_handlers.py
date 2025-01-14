@@ -1,4 +1,5 @@
 from telegram import Update, ReplyKeyboardMarkup, Bot
+import re
 from telegram.ext import ContextTypes, MessageHandler, filters
 from config import ADMIN_CHAT_ID
 
@@ -25,8 +26,16 @@ async def handle_application_name(update: Update, context: ContextTypes.DEFAULT_
     await update.message.reply_text("Введите ваш номер телефона:")
     return "PHONE"
 
-async def handle_application_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['application']['phone'] = update.message.text
+# Add this function to validate phone numbers
+def is_valid_phone_number(phone_number):
+    # Simple regex for phone number validation (e.g., 10-15 digits)
+    return re.match(r'^\d{10,15}$', phone_number)
+    phone_number = update.message.text
+    if not is_valid_phone_number(phone_number):
+        await update.message.reply_text("Пожалуйста, введите корректный номер телефона (10-15 цифр).")
+        return "PHONE"
+    
+    context.user_data['application']['phone'] = phone_number
     await update.message.reply_text("Введите комментарий (опционально) или нажмите /skip:")
     return "COMMENT"
 
@@ -37,10 +46,10 @@ async def handle_application_comment(update: Update, context: ContextTypes.DEFAU
     application_data = context.user_data['application']
     bot = context.bot
     message = (
-        f"📝 *Новая заявка:*\n"
-        f"👤 *Имя:* {application_data['name']}\n"
-        f"📞 *Номер телефона:* {application_data['phone']}\n"
-        f"💬 *Комментарий:* {application_data['comment'] or 'Без комментариев'}"
+        f"📝 Новая заявка:\n"
+        f"👤 Имя: {application_data['name']}\n"
+        f"📞 Номер телефона: {application_data['phone']}\n"
+        f"💬 Комментарий: {application_data['comment'] or 'Без комментариев'}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message)
     return ConversationHandler.END
