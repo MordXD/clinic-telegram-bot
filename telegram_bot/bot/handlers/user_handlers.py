@@ -100,7 +100,19 @@ async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_T
     else:
         await query.edit_message_text(text="Спасибо за ваш отзыв! Мы ценим ваше мнение.")
         return ConversationHandler.END
+async def handle_feedback_dislikes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback']['dislikes'] = update.message.text
+    await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
+    # Send the detailed feedback to the admin chat
+    feedback_data = context.user_data.get('feedback', {})
+    bot = context.bot
+    message = (
+        f"📝 *Новый отзыв:*\n"
+        f"⭐ *Оценка:* {feedback_data.get('rating', 'Нет оценки')}\n"
+        f"👎 *Что не понравилось:* {feedback_data['dislikes']}"
+    )
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
+    return ConversationHandler.END
     await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
     # Send the detailed feedback to the admin chat
     feedback_data = context.user_data.get('feedback', {})
