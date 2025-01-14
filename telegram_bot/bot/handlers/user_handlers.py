@@ -30,7 +30,9 @@ async def handle_application_phone(update: Update, context: ContextTypes.DEFAULT
 async def handle_application_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application']['comment'] = update.message.text
     await update.message.reply_text("Ваша заявка принята. Ожидайте звонка.")
-    # Here you would send the application data to the admin chat
+    # Send the application data to the admin chat
+    application_data = context.user_data['application']
+    # Example: send_application_to_admin(application_data)
     return "END"
 
 async def skip_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -52,7 +54,9 @@ async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_T
 async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback']['comment'] = update.message.text
     await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
-    # Here you would send the feedback data to the admin chat
+    # Send the feedback data to the admin chat
+    feedback_data = context.user_data['feedback']
+    # Example: send_feedback_to_admin(feedback_data)
     return "END"
 
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
