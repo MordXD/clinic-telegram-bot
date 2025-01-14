@@ -1,3 +1,5 @@
+import logging
+import coloredlogs
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
@@ -10,6 +12,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Я ваш бот для приёма заявок и отзывов.")
 
 def main():
+    # Set up logging
+    logging.basicConfig(level=logging.DEBUG)
+    coloredlogs.install(level=LOG_LEVEL, fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
     application = ApplicationBuilder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
