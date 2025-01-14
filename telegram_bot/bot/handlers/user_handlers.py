@@ -68,7 +68,7 @@ async def skip_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback'] = {}
-    # Create inline buttons for star ratings
+    # Create inline buttons with compact emojis for ratings
     keyboard = [
         [InlineKeyboardButton("👍", callback_data='1'),
          InlineKeyboardButton("👌", callback_data='2'),
@@ -78,37 +78,7 @@ async def handle_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Пожалуйста, выберите вашу оценку:", reply_markup=reply_markup)
-    return "LIKES"
-
-async def handle_feedback_likes(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['feedback']['likes'] = update.message.text
-    await update.message.reply_text("Теперь введите текст отзыва:")
-    return "COMMENT"
-
-async def skip_likes(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['feedback']['likes'] = None
-    await update.message.reply_text("Теперь введите текст отзыва:")
-
-async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    rating = int(query.data)
-    context.user_data['feedback']['rating'] = rating
-
-    # Send feedback to admin group
-    bot = context.bot
-    message = (
-        f"📝 *Новый отзыв:*\n"
-        f"⭐ *Оценка:* {rating}"
-    )
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
-
-    if rating < 4:
-        await query.edit_message_text(text=f"Вы выбрали {query.data}. Пожалуйста, напишите, что вам не понравилось:")
-        return "DISLIKES"
-    else:
-        await query.edit_message_text(text="Спасибо за ваш отзыв! Мы ценим ваше мнение.")
-        return ConversationHandler.END
+    return "RATING"
 
 async def handle_feedback_dislikes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback']['dislikes'] = update.message.text
