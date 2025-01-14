@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, Bot, InlineKeyboardButton, InlineKeyboardMarkup
 import re
-from telegram.ext import ContextTypes, MessageHandler, filters
+from telegram.ext import ContextTypes, MessageHandler, filters, CallbackQueryHandler
 from config import ADMIN_CHAT_ID
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -78,7 +78,16 @@ async def handle_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Пожалуйста, выберите вашу оценку:", reply_markup=reply_markup)
+    return "LIKES"
+
+async def handle_feedback_likes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['feedback']['likes'] = update.message.text
+    await update.message.reply_text("Теперь введите текст отзыва:")
     return "COMMENT"
+
+async def skip_likes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['feedback']['likes'] = None
+    await update.message.reply_text("Теперь введите текст отзыва:")
 
 async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -91,11 +100,12 @@ async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_
     context.user_data['feedback']['comment'] = update.message.text
     await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
     # Send the feedback data to the admin chat
-    feedback_data = context.user_data['feedback']
+    feedback_data = context.user_data.get('feedback', {})
     bot = context.bot
     message = (
         f"📝 *Новый отзыв:*\n"
         f"⭐ *Оценка:* {feedback_data['rating']}\n"
+        f"👍 *Что понравилось:* {feedback_data.get('likes', 'Не указано')}\n"
         f"💬 *Комментарий:* {feedback_data['comment']}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
@@ -120,7 +130,8 @@ def handle_user_commands():
         ConversationHandler(
             entry_points=[MessageHandler(filters.TEXT & filters.Regex("^Оставить отзыв$"), handle_feedback)],
             states={
-                "RATING": [MessageHandler(filters.TEXT, handle_feedback_rating)],
+                "RATING": [CallbackQueryHandler(handle_feedback_rating)],
+                "LIKES": [MessageHandler(filters.TEXT, handle_feedback_likes), CommandHandler("skip", skip_likes)],
                 "COMMENT": [MessageHandler(filters.TEXT, handle_feedback_comment)],
             },
             fallbacks=[CommandHandler("cancel", start)],
