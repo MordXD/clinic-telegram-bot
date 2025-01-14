@@ -3,7 +3,6 @@ import coloredlogs
 from telegram import Update
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
 from config import BOT_TOKEN, LOG_LEVEL
 from config import ADMIN_CHAT_ID
 from bot.handlers.admin_handlers import handle_admin_notifications

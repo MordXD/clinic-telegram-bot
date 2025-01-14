@@ -121,21 +121,15 @@
      ```
      TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
      ADMIN_CHAT_ID=YOUR_ADMIN_CHAT_ID
+     LOG_LEVEL = debug
      ```
+   - Уровень логирование можно настроить: prod, dev, debug
 
 5. **Запуск бота:**
    ```bash
-   python bot.py
+   cd telegram_bot
+   python main.py
    ```
-
-6. **Размещение на сервере (опционально):**
-   - **Heroku:**
-     - Установите Heroku CLI.
-     - Выполните команду `heroku create`.
-     - Настройте переменные окружения на Heroku.
-     - Разверните приложение командой `git push heroku main`.
-   - **Локальный сервер:**
-     - Убедитесь, что сервер всегда работает (используйте `screen`, `tmux` или `supervisor`).
 
 ## Документация
 
