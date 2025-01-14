@@ -53,7 +53,11 @@ async def handle_application_comment(update: Update, context: ContextTypes.DEFAU
         f"📞 Номер телефона: {application_data['phone']}\n"
         f"💬 Комментарий: {application_data['comment'] or 'Без комментариев'}"
     )
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message)
+    await bot.send_message(
+        chat_id=ADMIN_CHAT_ID,
+        text=message,
+        parse_mode="MARKDOWN"
+    )
     return ConversationHandler.END
 
 async def skip_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
