@@ -18,7 +18,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_application(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application'] = {}
     await update.message.reply_text("Пожалуйста, введите ваше имя:")
-    return "NAME"
+    return ConversationHandler.END
 
 async def handle_application_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application']['name'] = update.message.text
@@ -43,18 +43,18 @@ async def handle_application_comment(update: Update, context: ContextTypes.DEFAU
         f"Comment: {application_data['comment'] or 'No comment'}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message)
-    return "END"
+    return ConversationHandler.END
 
 async def skip_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application']['comment'] = None
     await update.message.reply_text("Ваша заявка принята. Ожидайте звонка.")
     # Here you would send the application data to the admin chat
-    return "END"
+    return ConversationHandler.END
 
 async def handle_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback'] = {}
     await update.message.reply_text("Пожалуйста, оставьте ваш отзыв и оценку от 1 до 5:")
-    return "RATING"
+    return "COMMENT"
 
 async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback']['rating'] = update.message.text
