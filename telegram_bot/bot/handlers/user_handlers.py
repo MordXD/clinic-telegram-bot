@@ -91,6 +91,7 @@ async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_T
         return "DISLIKES"
     else:
         await query.edit_message_text(text="Спасибо за ваш отзыв! Мы ценим ваше мнение.")
+        await send_feedback_to_admin(update, context)
         return ConversationHandler.END
 async def handle_feedback_dislikes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback']['dislikes'] = update.message.text
@@ -110,29 +111,7 @@ async def send_feedback_to_admin(update: Update, context: ContextTypes.DEFAULT_T
         f"👎 *Что не понравилось:* {feedback_data.get('dislikes', 'Не указано')}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
-    await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
-    # Send the detailed feedback to the admin chat
-    feedback_data = context.user_data.get('feedback', {})
-    bot = context.bot
-    message = (
-        f"📝 *Новый отзыв:*\n"
-        f"⭐ *Оценка:* {feedback_data.get('rating', 'Нет оценки')}\n"
-        f"👎 *Что не понравилось:* {feedback_data['dislikes']}"
-    )
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
-    return ConversationHandler.END
-    context.user_data['feedback']['comment'] = update.message.text
-    await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
-    # Send the feedback data to the admin chat
-    feedback_data = context.user_data.get('feedback', {})
-    bot = context.bot
-    message = (
-        f"📝 *Новый отзыв:*\n"
-        f"⭐ *Оценка:* {feedback_data['rating']}\n"
-        f"👍 *Что понравилось:* {feedback_data.get('likes', 'Не указано')}\n"
-        f"💬 *Комментарий:* {feedback_data['comment']}"
-    )
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
+    await send_feedback_to_admin(update, context)
     return ConversationHandler.END
 
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
