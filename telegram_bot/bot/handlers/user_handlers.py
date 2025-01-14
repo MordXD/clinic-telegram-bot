@@ -89,7 +89,7 @@ def handle_user_commands():
                 "PHONE": [MessageHandler(filters.TEXT, handle_application_phone)],
                 "COMMENT": [MessageHandler(filters.TEXT, handle_application_comment), CommandHandler("skip", skip_comment)],
             },
-            fallbacks=[CommandHandler("cancel", start)],
+            fallbacks=[CommandHandler("cancel", handle_application)],
         ),
         ConversationHandler(
             entry_points=[MessageHandler(filters.TEXT & filters.Regex("^Оставить отзыв$"), handle_feedback)],
