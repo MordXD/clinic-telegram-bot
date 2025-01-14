@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup, Bot
+from telegram import Update, ReplyKeyboardMarkup, Bot, InlineKeyboardButton, InlineKeyboardMarkup
 import re
 from telegram.ext import ContextTypes, MessageHandler, filters
 from config import ADMIN_CHAT_ID
@@ -68,12 +68,23 @@ async def skip_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback'] = {}
-    await update.message.reply_text("Пожалуйста, оставьте ваш отзыв и оценку от 1 до 5:")
+    # Create inline buttons for star ratings
+    keyboard = [
+        [InlineKeyboardButton("⭐", callback_data='1'),
+         InlineKeyboardButton("⭐⭐", callback_data='2'),
+         InlineKeyboardButton("⭐⭐⭐", callback_data='3'),
+         InlineKeyboardButton("⭐⭐⭐⭐", callback_data='4'),
+         InlineKeyboardButton("⭐⭐⭐⭐⭐", callback_data='5')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("Пожалуйста, выберите вашу оценку:", reply_markup=reply_markup)
     return "COMMENT"
 
 async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['feedback']['rating'] = update.message.text
-    await update.message.reply_text("Введите текст отзыва:")
+    query = update.callback_query
+    await query.answer()
+    context.user_data['feedback']['rating'] = query.data
+    await query.edit_message_text(text=f"Вы выбрали {query.data} звёзд. Теперь введите текст отзыва:")
     return "COMMENT"
 
 async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -83,11 +94,11 @@ async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_
     feedback_data = context.user_data['feedback']
     bot = context.bot
     message = (
-        f"New Feedback:\n"
-        f"Rating: {feedback_data['rating']}\n"
-        f"Comment: {feedback_data['comment']}"
+        f"📝 *Новый отзыв:*\n"
+        f"⭐ *Оценка:* {feedback_data['rating']}\n"
+        f"💬 *Комментарий:* {feedback_data['comment']}"
     )
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message)
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
     return "END"
 
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
