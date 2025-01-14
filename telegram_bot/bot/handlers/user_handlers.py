@@ -30,6 +30,8 @@ async def handle_application_name(update: Update, context: ContextTypes.DEFAULT_
 def is_valid_phone_number(phone_number):
     # Simple regex for phone number validation (e.g., 10-15 digits)
     return re.match(r'^\d{10,15}$', phone_number)
+
+async def handle_application_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phone_number = update.message.text
     if not is_valid_phone_number(phone_number):
         await update.message.reply_text("Пожалуйста, введите корректный номер телефона (10-15 цифр).")
