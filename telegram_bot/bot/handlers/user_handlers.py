@@ -86,17 +86,20 @@ async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_T
     rating = int(query.data)
     context.user_data['feedback']['rating'] = rating
 
+    # Send feedback to admin group
+    await send_feedback_to_admin(update, context)
+
     if rating <= 3:
         await query.edit_message_text(text=f"Вы выбрали {query.data}. Пожалуйста, напишите, что вам не понравилось:")
         return "DISLIKES"
     else:
         await query.edit_message_text(text="Спасибо за ваш отзыв! Мы ценим ваше мнение.")
-        await send_feedback_to_admin(update, context)
         return ConversationHandler.END
+
 async def handle_feedback_dislikes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['feedback']['dislikes'] = update.message.text
     await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
-    # Send the detailed feedback to the admin chat
+    # Update the feedback with dislikes and send to admin
     await send_feedback_to_admin(update, context)
     return ConversationHandler.END
 
@@ -110,9 +113,7 @@ async def send_feedback_to_admin(update: Update, context: ContextTypes.DEFAULT_T
         f"⭐ *Оценка:* {feedback_data.get('rating', 'Нет оценки')}\n"
         f"👎 *Что не понравилось:* {feedback_data.get('dislikes', 'Не указано')}"
     )
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
-    await send_feedback_to_admin(update, context)
-    return ConversationHandler.END
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MarkdownV2")
 
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Контактные данные клиники: +1234567890")
