@@ -100,8 +100,8 @@
 
 1. **Клонирование репозитория:**
    ```bash
-   git clone https://github.com/ваш-репозиторий/телеграм-бот-клиника.git
-   cd телеграм-бот-клиника
+   git clone https://github.com/MordXD/clinic-telegram-bot.git
+   cd clinic-telegram-bot
    ```
 
 2. **Создание и активация виртуального окружения:**
