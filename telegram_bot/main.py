@@ -9,7 +9,24 @@ from bot.handlers.admin_handlers import handle_admin_notifications
 from bot.handlers.user_handlers import handle_user_commands
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Привет! Я ваш бот для приёма заявок и отзывов.")
+    clinic_info = (
+        "О клинике\n"
+        "ООО ТИМ осуществляет свою деятельность под торговым названием Центр акушерства и гинекологии Здоровая Я\n\n"
+        "Лицензии и сертификаты\n"
+        "Подарочные сертификаты\n"
+        "Дисконтные карты\n"
+        "Правовая информация\n"
+        "Карточка предприятия\n"
+        "Вакансии\n"
+        "Общая информация\n"
+        "Направления деятельности\n"
+        "Юридический и фактический адрес: 426068, ул. Автозаводская, 50, г. Ижевск\n"
+        "ИНН/КПП: 1840008864 / 184001001\n"
+        "Лицензия: ЛО-18-01-002421, дата выдачи 27 февраля 2018 года\n"
+        "Главный врач: Цатурян Юлия Григорьевна"
+    )
+    await update.message.reply_text(clinic_info)
+    await update.message.reply_photo(photo=open('assets/image.jpg', 'rb'))
 
 def main():
     # Set up logging
