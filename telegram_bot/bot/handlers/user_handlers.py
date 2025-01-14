@@ -9,7 +9,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(
-        "Привет! Я ваш бот для приёма заявок и отзывов.",
+        "Добро пожаловать в бот клиники Здоровая Я!\n"
+        "ООО ТИМ осуществляет свою деятельность под торговым названием Центр акушерства и гинекологии Здоровая Я.\n"
+        "Выберите одну из опций ниже, чтобы продолжить.",
         reply_markup=reply_markup
     )
 
