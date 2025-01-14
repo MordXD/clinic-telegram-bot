@@ -1,5 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, Bot
 from telegram.ext import ContextTypes, MessageHandler, filters
+from config import ADMIN_CHAT_ID
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
