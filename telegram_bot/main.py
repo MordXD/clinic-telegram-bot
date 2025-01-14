@@ -1,6 +1,7 @@
 import logging
 import coloredlogs
 from telegram import Update
+from telegram import ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 from config import BOT_TOKEN, LOG_LEVEL
@@ -10,23 +11,19 @@ from bot.handlers.user_handlers import handle_user_commands
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clinic_info = (
-        "О клинике\n"
-        "ООО ТИМ осуществляет свою деятельность под торговым названием Центр акушерства и гинекологии Здоровая Я\n\n"
-        "Лицензии и сертификаты\n"
-        "Подарочные сертификаты\n"
-        "Дисконтные карты\n"
-        "Правовая информация\n"
-        "Карточка предприятия\n"
-        "Вакансии\n"
-        "Общая информация\n"
-        "Направления деятельности\n"
-        "Юридический и фактический адрес: 426068, ул. Автозаводская, 50, г. Ижевск\n"
-        "ИНН/КПП: 1840008864 / 184001001\n"
-        "Лицензия: ЛО-18-01-002421, дата выдачи 27 февраля 2018 года\n"
-        "Главный врач: Цатурян Юлия Григорьевна"
+        "Добро пожаловать в бот клиники Здоровая Я!\n"
+        "ООО ТИМ осуществляет свою деятельность под торговым названием Центр акушерства и гинекологии Здоровая Я.\n"
+        "Выберите одну из опций ниже, чтобы продолжить."
     )
-    await update.message.reply_text(clinic_info)
+    
+    keyboard = [
+        ["Оставить заявку", "Оставить отзыв"],
+        ["Связаться с администратором"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    
     await update.message.reply_photo(photo=open('assets/image.jpg', 'rb'))
+    await update.message.reply_text(clinic_info, reply_markup=reply_markup)
 
 def main():
     # Set up logging
