@@ -39,7 +39,7 @@ async def handle_application_phone(update: Update, context: ContextTypes.DEFAULT
     
     context.user_data['application']['phone'] = phone_number
     await update.message.reply_text("Введите комментарий (опционально) или нажмите /skip:")
-    return "RATING"
+    return "COMMENT"  # Correct state transition
 
 async def handle_application_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['application']['comment'] = update.message.text
