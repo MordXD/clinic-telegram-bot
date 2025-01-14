@@ -109,7 +109,7 @@ async def send_feedback_to_admin(update: Update, context: ContextTypes.DEFAULT_T
         f"⭐ *Оценка:* {feedback_data.get('rating', 'Нет оценки')}\n"
         f"👎 *Что не понравилось:* {feedback_data.get('dislikes', 'Не указано')}"
     )
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MarkdownV2")
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MARKDOWN")
     await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
     # Send the detailed feedback to the admin chat
     feedback_data = context.user_data.get('feedback', {})
