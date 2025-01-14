@@ -13,17 +13,71 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def handle_application(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['application'] = {}
     await update.message.reply_text("Пожалуйста, введите ваше имя:")
+    return "NAME"
+
+async def handle_application_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['application']['name'] = update.message.text
+    await update.message.reply_text("Введите ваш номер телефона:")
+    return "PHONE"
+
+async def handle_application_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['application']['phone'] = update.message.text
+    await update.message.reply_text("Введите комментарий (опционально) или нажмите /skip:")
+    return "COMMENT"
+
+async def handle_application_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['application']['comment'] = update.message.text
+    await update.message.reply_text("Ваша заявка принята. Ожидайте звонка.")
+    # Here you would send the application data to the admin chat
+    return "END"
+
+async def skip_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['application']['comment'] = None
+    await update.message.reply_text("Ваша заявка принята. Ожидайте звонка.")
+    # Here you would send the application data to the admin chat
+    return "END"
 
 async def handle_feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['feedback'] = {}
     await update.message.reply_text("Пожалуйста, оставьте ваш отзыв и оценку от 1 до 5:")
+    return "RATING"
+
+async def handle_feedback_rating(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['feedback']['rating'] = update.message.text
+    await update.message.reply_text("Введите текст отзыва:")
+    return "COMMENT"
+
+async def handle_feedback_comment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['feedback']['comment'] = update.message.text
+    await update.message.reply_text("Спасибо за ваш отзыв! Мы ценим ваше мнение.")
+    # Here you would send the feedback data to the admin chat
+    return "END"
 
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Контактные данные клиники: +1234567890")
 
+from telegram.ext import ConversationHandler, CommandHandler
+
 def handle_user_commands():
     return [
-        MessageHandler(filters.TEXT & filters.Regex("^Оставить заявку$"), handle_application),
-        MessageHandler(filters.TEXT & filters.Regex("^Оставить отзыв$"), handle_feedback),
+        ConversationHandler(
+            entry_points=[MessageHandler(filters.TEXT & filters.Regex("^Оставить заявку$"), handle_application)],
+            states={
+                "NAME": [MessageHandler(filters.TEXT, handle_application_name)],
+                "PHONE": [MessageHandler(filters.TEXT, handle_application_phone)],
+                "COMMENT": [MessageHandler(filters.TEXT, handle_application_comment), CommandHandler("skip", skip_comment)],
+            },
+            fallbacks=[CommandHandler("cancel", start)],
+        ),
+        ConversationHandler(
+            entry_points=[MessageHandler(filters.TEXT & filters.Regex("^Оставить отзыв$"), handle_feedback)],
+            states={
+                "RATING": [MessageHandler(filters.TEXT, handle_feedback_rating)],
+                "COMMENT": [MessageHandler(filters.TEXT, handle_feedback_comment)],
+            },
+            fallbacks=[CommandHandler("cancel", start)],
+        ),
         MessageHandler(filters.TEXT & filters.Regex("^Связаться с администратором$"), contact_admin),
     ]
