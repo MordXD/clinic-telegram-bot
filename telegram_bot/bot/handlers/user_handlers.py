@@ -103,15 +103,21 @@ async def handle_feedback_dislikes(update: Update, context: ContextTypes.DEFAULT
     await send_feedback_to_admin(update, context)
     return ConversationHandler.END
 
+import re
+
+def escape_markdown_v2(text):
+    # Escape special characters for MarkdownV2
+    return re.sub(r'([_*\[\]()~`>#+\-=|{}.!])', r'\\\1', text)
+
 async def send_feedback_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     feedback_data = context.user_data.get('feedback', {})
     user = update.effective_user
     bot = context.bot
     message = (
         f"📝 *Новый отзыв:*\n"
-        f"👤 *Пользователь:* {user.first_name} {user.last_name or ''} (@{user.username or 'нет'})\n"
+        f"👤 *Пользователь:* {escape_markdown_v2(user.first_name)} {escape_markdown_v2(user.last_name or '')} (@{escape_markdown_v2(user.username or 'нет')})\n"
         f"⭐ *Оценка:* {feedback_data.get('rating', 'Нет оценки')}\n"
-        f"👎 *Что не понравилось:* {feedback_data.get('dislikes', 'Не указано')}"
+        f"👎 *Что не понравилось:* {escape_markdown_v2(feedback_data.get('dislikes', 'Не указано'))}"
     )
     await bot.send_message(chat_id=ADMIN_CHAT_ID, text=message, parse_mode="MarkdownV2")
 
