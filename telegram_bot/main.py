@@ -1,5 +1,6 @@
 import logging
 import coloredlogs
+import structlog
 from telegram import Update
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -10,6 +11,8 @@ from bot.handlers.user_handlers import handle_user_commands
 import uvicorn
 from fastapi import FastAPI
 from telegram_bot.api import all_routers
+from prometheus_client import make_asgi_app, Counter
+from starlette.middleware.wsgi import WSGIMiddleware
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clinic_info = (
@@ -31,26 +34,43 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 def main():
-    # Set up logging
+    # Set up structlog
+    structlog.configure(
+        processors=[
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.processors.JSONRenderer()
+        ],
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
     logging.basicConfig(level=logging.DEBUG)
     coloredlogs.install(level=LOG_LEVEL, fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
+    logger = structlog.get_logger()
+    logger.info("Bot starting")
     application = ApplicationBuilder().token(BOT_TOKEN).build()
-
     application.add_handler(CommandHandler("start", start))
-    
-    # Register user command handlers
     for handler in handle_user_commands():
         application.add_handler(handler)
-    
     application.add_handler(CommandHandler("admin_notifications", handle_admin_notifications))
-
     application.run_polling()
+
+# Метрика для FastAPI
+REQUEST_COUNT = Counter('http_requests_total', 'Total HTTP Requests', ['method', 'endpoint'])
 
 def run_fastapi():
     app = FastAPI(title="Clinic API", description="API для заявок, отзывов и статистики")
     for router in all_routers:
         app.include_router(router)
+    # Middleware для подсчёта запросов
+    @app.middleware("http")
+    async def prometheus_middleware(request, call_next):
+        response = await call_next(request)
+        REQUEST_COUNT.labels(method=request.method, endpoint=request.url.path).inc()
+        return response
+    # Добавляем endpoint /metrics
+    app.mount("/metrics", make_asgi_app())
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":

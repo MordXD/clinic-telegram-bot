@@ -1,0 +1,77 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: clinic_db
+      POSTGRES_USER: clinic_user
+      POSTGRES_PASSWORD: clinic_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@clinic.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python telegram_bot/main.py
+    environment:
+      - BOT_TOKEN=ваш_токен
+      - LOG_LEVEL=INFO
+      - ADMIN_CHAT_ID=ваш_id
+      - DATABASE_URL=postgresql+psycopg2://clinic_user:clinic_pass@db:5432/clinic_db
+    depends_on:
+      - db
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python telegram_bot/main.py api
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://clinic_user:clinic_pass@db:5432/clinic_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: always
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: alembic upgrade head
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://clinic_user:clinic_pass@db:5432/clinic_db
+    depends_on:
+      - db
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata: 

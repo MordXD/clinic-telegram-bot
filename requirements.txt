@@ -1,3 +1,9 @@
+python-telegram-bot==20.0
 fastapi
-pydantic
-fastapi-jwt-auth 
+uvicorn
+psycopg2-binary
+alembic
+coloredlogs
+structlog
+prometheus_client
+# Добавьте сюда остальные ваши зависимости 
